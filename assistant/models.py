@@ -10,6 +10,8 @@ class Passage:
     start_line: int
     end_line: int
     text: str
+    page_number: int | None = None
+    location_kind: str = "lines"
 
 
 @dataclass(frozen=True)

@@ -1,8 +1,53 @@
 # Fictional SOP Knowledge Assistant
 
-A beginner-friendly Python command-line MVP. It searches local Markdown SOPs,
+A beginner-friendly Python application with a CLI and local Streamlit chat UI. It searches local documents,
 then optionally asks OpenAI to answer using only retrieved passages. All three
 sample SOPs describe an imaginary company and are not real operating policies.
+
+## Windows browser setup and launch
+
+Open PowerShell in the project directory. Install dependencies in a local virtual
+environment (installation needs internet, but search and tests do not):
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m streamlit run web_app.py
+```
+
+Open `http://127.0.0.1:8501` if your browser does not open automatically. Stop the
+server with Ctrl+C. The included Streamlit configuration binds to localhost
+and disables usage telemetry. No database or cloud hosting is involved.
+
+Search-only is enabled by default and requires no API key. Enter a question in
+the chat box and expand sources to see evidence and citations. Use the sidebar
+to select Markdown, PDF or DOCX files, then click **Add uploaded documents**.
+Uploads are stored in `data/uploads/`, excluded from Git, and survive restarts.
+The sidebar lists uploads and provides a **Remove** button for each one. Removal
+deletes the stored file and clears that browser session's chat. Files are never
+silently overwritten; rename a duplicate or remove the old document first.
+Filenames must use simple letters, numbers, spaces, dots, underscores or hyphens.
+You can uncheck **Include fictional sample SOPs** to search only uploads.
+
+For AI answers, copy `.env.example` to `.env`, configure your API key and model
+as described below, and turn off **Search only**. No key entry/display widget is
+provided. API errors use generic messages; keys are never intentionally displayed
+or logged. Questions and retrieved excerpts are sent to OpenAI only in AI mode.
+Chat history is session-local and is not saved to disk. Each turn is an independent
+question; previous chat is not sent to the model.
+
+Markdown uses original headings and inclusive line numbers. PDFs use their
+original page numbers and extracted text line numbers, which are not layout
+coordinates. DOCX uses headings and numbered paragraph/table blocks; reliable
+Word page numbers are unavailable without a layout engine. Table text is included.
+Scanned PDFs without extractable text, encrypted PDFs, invalid files and empty
+documents are rejected with errors. OCR is not included. Individual uploads are
+limited to 20 MB. Complex layouts can have imperfect extraction order.
+
+This is a local single-user prototype, not a production enterprise security
+system. Uploads are stored as ordinary local files and shared across local browser
+sessions. Removed documents disappear from new searches; another browser session
+may still contain prior answers. Protect the machine and avoid uploading credentials.
 
 ## Start with offline search
 
@@ -78,8 +123,16 @@ reported as errors, rather than presented as knowledge gaps.
 python -m unittest discover -s tests -v
 ```
 
-Tests use standard-library `unittest`, fake generators, and a fake SDK client;
-they require no API key, installed SDK, or network. They do not test a real
+For the full suite including PDF/DOCX and Streamlit tests, use:
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+```
+
+Tests use standard-library `unittest`, generated tiny local document fixtures,
+fake generators, and a fake SDK client. Install requirements first for the new
+parser and browser tests; execution needs no API key or network. The original
+offline CLI tests still need no SDK. They do not test a real
 OpenAI response or guarantee that every generated claim is factually supported.
 
 ## Limits and next steps
@@ -97,3 +150,10 @@ and format its returned `Answer`. A Confluence importer can produce the same
 passage records with original URLs and version metadata. Before exposing real
 internal content, add user identity and source permission filtering. Semantic
 retrieval can later replace `search.py` while retaining the service interface.
+
+New components: `web_app.py` implements the Streamlit chat/sidebar;
+`assistant/documents.py` validates uploads and manages local files;
+`assistant/presentation.py` formats citations for both interfaces. The existing
+loader now supports PDF and DOCX through lazy imports, preserving dependency-free
+Markdown CLI retrieval. Both interfaces reuse the same search, generator and
+service, with document text treated as untrusted evidence rather than instructions.

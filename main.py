@@ -6,11 +6,7 @@ from assistant.generator import OpenAIGenerator
 from assistant.loader import load_passages
 from assistant.search import search
 from assistant.service import AssistantService
-
-
-def describe_source(source):
-    p = source.passage
-    return f"[{source.identifier}] {p.title} - {p.section}\n  {p.path}, lines {p.start_line}-{p.end_line}"
+from assistant.presentation import describe_source
 
 
 def main():

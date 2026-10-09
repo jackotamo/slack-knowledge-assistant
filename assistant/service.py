@@ -2,7 +2,7 @@
 from .models import Answer
 from .search import search
 
-ABSTENTION = "I don't have enough information in the available SOPs to answer that."
+ABSTENTION = "I don't have enough information in the available documents to answer that."
 
 
 class AssistantService:
